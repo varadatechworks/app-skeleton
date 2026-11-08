@@ -1,0 +1,15 @@
+import {allowedSimple} from '../modules/authorization/simple.mjs';
+import {navigationFor} from '../modules/admin/index.mjs';
+import {validateGeoEvidence} from '../modules/geo/index.mjs';
+import {createFormVersion,validateSubmission} from '../modules/survey/index.mjs';
+import {calculateQuote} from '../modules/billing/index.mjs';
+import {createDispatcher} from '../modules/notifications/index.mjs';
+const roleGrants={ADMIN:{users:['view','edit'],reports:['view']}};
+console.log('Can edit users:',allowedSimple({roles:['ADMIN'],roleGrants,resource:'users',action:'edit'}));
+console.log('Admin menu:',navigationFor({preset:'operational',grants:{dashboard:['view'],users:['view'],reports:['view']}}).map(x=>x.title));
+const location=validateGeoEvidence({latitude:12.9716,longitude:77.5946,accuracyMeters:12,capturedAt:new Date().toISOString(),mocked:false,source:'device-gps'});
+const form=createFormVersion({formId:'sample',version:1,fields:[{key:'visitors',type:'number',required:true,min:0}],requireLocation:true});
+console.log('Survey:',validateSubmission(form,{formId:'sample',version:1,actorId:'actor-1',tenantId:'tenant-1',answers:{visitors:12},location},{authorizedTarget:true}).answers);
+console.log('Quote:',calculateQuote({tenantId:'tenant-1',unitPriceMinor:10000,quantity:2,taxes:[{tenantId:'tenant-1',component:'IGST',rateBps:1800}]}).totalMinor);
+const dispatch=createDispatcher({providers:{}});
+console.log('Notification (safe dry run):',await dispatch({id:'msg1',tenantId:'tenant-1',userId:'actor-1',channel:'in_app',template:'Hello {{name}}',variables:{name:'Visitor'}}));

@@ -1,0 +1,3 @@
+import test from 'node:test';import assert from 'node:assert/strict';
+import {d1Repository} from '../adapters/d1/index.mjs';
+test('D1 repository binds tenant to every query',async()=>{let traces=[];const db={prepare:sql=>({bind(...args){traces.push({sql,args});return {first:async()=>({id:'u'}),all:async()=>({results:[{id:'u'}]}),run:async()=>({success:true})};}})};const repo=d1Repository(db,{table:'app_users',columns:['email']},{verified:true,tenantId:'t'});assert.equal((await repo.get('u')).id,'u');assert.equal((await repo.list()).length,1);await repo.create({id:'u',email:'u@example.com'});await repo.update('u',{email:'next@example.com'});assert.ok(traces.every(x=>x.sql.includes('tenant_id')&&x.args.includes('t')));});

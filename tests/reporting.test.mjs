@@ -1,0 +1,4 @@
+import test from 'node:test';import assert from 'node:assert/strict';
+import {aggregateRows,csvExport,operationalMetrics} from '../modules/reporting/index.mjs';
+test('allowlisted report dimensions and sum',()=>{const rows=[{zone:'A',amount:10},{zone:'A',amount:20},{zone:'B',amount:5}];assert.equal(aggregateRows(rows,{dimension:'zone',metric:'sum',measure:'amount',allowedDimensions:['zone'],allowedMeasures:['amount']})[0].value,30);assert.throws(()=>aggregateRows(rows,{dimension:'__proto__',allowedDimensions:['zone']}));assert.equal(operationalMetrics([{status:'success',amountMinor:500},{status:'failed',amountMinor:100}]).amountMinor,600);});
+test('CSV escapes quotes, leading formula and newlines',()=>{const s=csvExport([{name:'=HYPERLINK("x")',comment:'new\nline'}],['name','comment']);assert.ok(s.includes('"\'=HYPERLINK('));assert.ok(s.includes('"new\nline"'));assert.throws(()=>csvExport([{}],['name;DROP']));});

@@ -1,0 +1,4 @@
+export interface Quote {tenantId:string;currency:string;quantity:number;unitMinor:number;subtotalMinor:number;discountMinor:number;taxableMinor:number;taxMinor:number;totalMinor:number;taxes:{component:string;rateBps:number;amountMinor:number}[];priceRuleId:string|null}
+export declare function roundBasisPoints(minor:number,bps:number):number;
+export declare function selectRule<T extends {id:string;tenantId:string;scope:string;targetId?:string;priority?:number;active?:boolean;validFrom?:string;validTo?:string;minQuantity?:number}>(rules:T[],context:Record<string,any>,options?:{at?:Date}):T|null;
+export declare function calculateQuote(input:{tenantId:string;unitPriceMinor:number;quantity?:number;currency?:string;priceRule?:{id:string;tenantId:string;type:'fixed'|'adjustment_bps';valueMinor?:number;bps?:number}|null;discountBps?:number;taxes?:{tenantId:string;component:'CGST'|'SGST'|'IGST'|'CESS'|'OTHER';rateBps:number}[]}):Quote;

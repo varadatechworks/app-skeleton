@@ -1,0 +1,14 @@
+{
+  "name": "@varada/app-skeleton",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Selectable, dependency-light application building blocks for Varada projects",
+  "engines": {"node": ">=20"},
+  "scripts": {
+    "test": "node --test tests/*.test.mjs",
+    "coverage": "node --experimental-test-coverage --test tests/*.test.mjs",
+    "modules": "node tools/create-app.mjs --list",
+    "new": "node tools/create-app.mjs"
+  }
+}

@@ -1,0 +1,3 @@
+export declare function verifyCheckoutSignature(input:{orderId:string;paymentId:string;signature:string;secret:string}):boolean;
+export declare function createPaymentProviderRegistry(providers?:Record<string,{createOrder:(...args:any[])=>any;refund:(...args:any[])=>any;fetchPayment:(...args:any[])=>any}>):{get(name:string):any;list():string[]};
+export declare function confirmCapturedPayment(input:{expected:{tenantId:string;orderId:string;providerOrderId:string;amountMinor:number;currency:string;paymentId?:string};providerPayment:{id:string;status:string;orderId:string;amountMinor:number;currency:string}}):any;

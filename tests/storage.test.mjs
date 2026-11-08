@@ -1,0 +1,3 @@
+import test from 'node:test';import assert from 'node:assert/strict';
+import {objectKey,validateUpload,signedPrivateUpload} from '../modules/storage/index.mjs';
+test('storage validates keys and media before signing',async()=>{assert.equal(objectKey({tenantId:'t',category:'survey',id:'a',fileName:'photo.png'}),'t/survey/a/photo.png');assert.throws(()=>objectKey({tenantId:'../secret',category:'survey',id:'a',fileName:'photo.png'}));assert.throws(()=>validateUpload({sizeBytes:20000000,mimeType:'image/png'}));assert.equal(validateUpload({sizeBytes:100,mimeType:'image/jpeg'}),true);assert.equal((await signedPrivateUpload({signUpload:async x=>x},{key:'t/a',mimeType:'image/jpeg'})).expiresInSeconds,300);});

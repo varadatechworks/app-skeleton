@@ -1,0 +1,6 @@
+{
+  "postgres":{"description":"PostgreSQL tenant-bound transaction and parameterized repository adapter","depends":["tenant","database"]},
+  "d1":{"description":"Cloudflare D1 tenant-bound repository adapter","depends":["tenant","database"]},
+  "node-http":{"description":"Framework-neutral authenticated HTTP route guard","depends":["identity","tenant"]},
+  "java":{"description":"JDK-only access, scope and location contract reference for Spring Boot consumers","depends":[]}
+}

@@ -1,0 +1,3 @@
+import test from 'node:test';import assert from 'node:assert/strict';
+import {navigationFor,verifyAdminAction,ADMIN_PRESETS} from '../modules/admin/index.mjs';
+test('operational and governance navigation filtered by permissions',()=>{assert.ok(ADMIN_PRESETS.operational.some(x=>x.feature==='payments'));assert.ok(ADMIN_PRESETS.governance.some(x=>x.feature==='surveys'));const links=navigationFor({preset:'comprehensive',grants:{dashboard:['view'],payments:['view'],users:['edit']}});assert.deepEqual(links.map(x=>x.feature),['dashboard','payments']);assert.throws(()=>verifyAdminAction({users:['view']},'users','delete'));});

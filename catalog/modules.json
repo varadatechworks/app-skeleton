@@ -1,0 +1,120 @@
+{
+  "identity": {
+    "description": "Account profiles, statuses and identity adapters (auth delegated to trusted provider)",
+    "depends": [
+      "tenant"
+    ],
+    "group": "foundation"
+  },
+  "authorization": {
+    "description": "Simple RBAC, feature/action permissions, functional assignments and hierarchical geography scopes",
+    "depends": [
+      "geo",
+      "tenant"
+    ],
+    "group": "foundation"
+  },
+  "tenant": {
+    "description": "Single-tenant and shared SaaS tenant guardrails",
+    "depends": [],
+    "group": "foundation"
+  },
+  "database": {
+    "description": "Database interfaces, safe identifiers, transaction contracts and SQL migrations",
+    "depends": [],
+    "group": "foundation"
+  },
+  "geo": {
+    "description": "GPS evidence, hierarchy verification and serviceability policy",
+    "depends": [],
+    "group": "field"
+  },
+  "survey": {
+    "description": "Versioned targeted field-survey forms, answers and submission validation",
+    "depends": [
+      "geo"
+    ],
+    "group": "field"
+  },
+  "notifications": {
+    "description": "Email, SMS, WhatsApp, push and in-app transport adapters with consent and templates",
+    "depends": [],
+    "group": "engagement"
+  },
+  "approvals": {
+    "description": "Maker-checker approval state machine and segregation of duties",
+    "depends": [],
+    "group": "governance"
+  },
+  "cms": {
+    "description": "Versioned, localized content and publish workflows",
+    "depends": [
+      "approvals"
+    ],
+    "group": "engagement"
+  },
+  "reporting": {
+    "description": "Allowlisted aggregate reports and safe CSV export",
+    "depends": [],
+    "group": "operations"
+  },
+  "admin": {
+    "description": "Permission-driven admin navigation and configurable operations/governance layouts",
+    "depends": [],
+    "group": "operations"
+  },
+  "audit": {
+    "description": "Append-only event shaping, location context and sensitive-data redaction",
+    "depends": [
+      "geo"
+    ],
+    "group": "governance"
+  },
+  "billing": {
+    "description": "Minor-unit quotes, scoped dynamic pricing, discounts and tax snapshots",
+    "depends": [],
+    "group": "commerce"
+  },
+  "workflow": {
+    "description": "Configurable workflow transitions, guards and status messages",
+    "depends": [],
+    "group": "operations"
+  },
+  "feature-flags": {
+    "description": "Environment/tenant/role feature visibility with secure defaults",
+    "depends": [],
+    "group": "operations"
+  },
+  "storage": {
+    "description": "Validated object keys and injectable private upload/download signing",
+    "depends": [],
+    "group": "foundation"
+  },
+  "i18n": {
+    "description": "Localization message lookup, English/Kannada ready, fallback behavior",
+    "depends": [],
+    "group": "engagement"
+  },
+  "import-export": {
+    "description": "Bulk-row validation, duplicate detection and sanitized exports",
+    "depends": [
+      "reporting"
+    ],
+    "group": "operations"
+  },
+  "observability": {
+    "description": "Correlation IDs, user-safe API errors and request logging structure",
+    "depends": [],
+    "group": "operations"
+  },
+  "app-management": {
+    "description": "Android/iOS release metadata and mandatory/optional upgrade decisions",
+    "depends": [],
+    "group": "operations"
+  },
+  "payments": {
+    "description": "Provider-neutral checkout contracts, webhook idempotency, partial/full refunds, reconciliation and settlement splits",
+    "depends": [],
+    "group": "commerce"
+  }
+}

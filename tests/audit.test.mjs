@@ -1,0 +1,3 @@
+import test from 'node:test';import assert from 'node:assert/strict';
+import {redact,createAuditEvent,appendAudit} from '../modules/audit/index.mjs';
+test('redacts nested sensitive keys and emits append-only shaped event',async()=>{assert.equal(redact({password:'bad',nested:{otp:'1234'}}).nested.otp,'[REDACTED]');const event=createAuditEvent({id:'e',tenantId:'t',actorId:'u',action:'update',resource:'user',correlationId:'corr-12345678',metadata:{apiKey:'secret',count:1}});assert.equal(event.metadata.apiKey,'[REDACTED]');let saved;await appendAudit({append:async v=>{saved=v}},event);assert.equal(saved.id,'e');await assert.rejects(()=>appendAudit({},event));});

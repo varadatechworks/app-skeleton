@@ -1,0 +1,5 @@
+import test from 'node:test';import assert from 'node:assert/strict';
+import {normalizeIdentifier,transitionUser,publicProfile,requireTrustedPrincipal,assertActiveUser} from '../modules/identity/index.mjs';
+test('identifier normalizes email/mobile; rejects invalid',()=>{assert.equal(normalizeIdentifier(' FOO@Example.com '),'foo@example.com');assert.equal(normalizeIdentifier('+91 98765 43210'),'+919876543210');assert.throws(()=>normalizeIdentifier('a@bad'),/Invalid/);});
+test('account transitions require actor and reason',()=>{assert.equal(transitionUser({id:'u',status:'active'},'suspended',{actorId:'a',reason:'review'}).status,'suspended');assert.throws(()=>transitionUser({id:'u',status:'active'},'pending',{actorId:'a',reason:'x'}));assert.throws(()=>transitionUser({id:'u',status:'active'},'suspended',{actorId:'a'}));});
+test('principal needs verified tenant',()=>{assert.throws(()=>requireTrustedPrincipal({userId:'u'}));assert.equal(requireTrustedPrincipal({verified:true,userId:'u',tenantId:'t'}).userId,'u');assert.equal(publicProfile({id:'u',passwordHash:'secret'}).passwordHash,undefined);assert.throws(()=>assertActiveUser({id:'u',status:'suspended'}));});

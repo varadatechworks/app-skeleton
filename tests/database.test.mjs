@@ -1,0 +1,4 @@
+import test from 'node:test';import assert from 'node:assert/strict';
+import {sqlIdentifier,parameterizedInsert,inTransaction,requireTenantRepository} from '../modules/database/index.mjs';
+test('SQL identifier allowlist and dialect-specific binding',()=>{assert.equal(sqlIdentifier('app_users'),'app_users');assert.throws(()=>sqlIdentifier('users; DROP TABLE users'));assert.equal(parameterizedInsert('users',['id','name']), 'INSERT INTO users (id,name) VALUES ($1,$2)');assert.equal(parameterizedInsert('users',['id','name'],{dialect:'d1'}),'INSERT INTO users (id,name) VALUES (?,?)');assert.throws(()=>parameterizedInsert('users',['id','id']));});
+test('transaction adapter required',async()=>{assert.equal(await inTransaction({transaction:fn=>fn()},()=>42),42);await assert.rejects(()=>inTransaction({},()=>42));assert.throws(()=>requireTenantRepository({find(){},save(){}}));});

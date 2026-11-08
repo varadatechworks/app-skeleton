@@ -1,0 +1,3 @@
+import test from 'node:test';import assert from 'node:assert/strict';
+import {featureEnabled,visibleFeatures} from '../modules/feature-flags/index.mjs';
+test('visibility is tenant/role/env scoped and disabled by default',()=>{const rules=[{feature:'billing',enabled:true,tenantId:'t',roles:['ADMIN'],environment:'production'}];assert.equal(featureEnabled('billing',{tenantId:'t',roles:['ADMIN'],rules}),true);assert.equal(featureEnabled('billing',{tenantId:'wrong',roles:['ADMIN'],rules}),false);assert.equal(featureEnabled('billing',{tenantId:'t',roles:['USER'],rules}),false);assert.deepEqual(visibleFeatures(['billing','unknown'],{tenantId:'t',roles:['ADMIN'],rules}),['billing']);});
