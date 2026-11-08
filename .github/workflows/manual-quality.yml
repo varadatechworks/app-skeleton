@@ -1,0 +1,17 @@
+name: Manual foundation checks
+on:
+  workflow_dispatch:
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Node unit tests
+        run: npm test
+      - name: Type contracts
+        run: npx --yes -p typescript@5.9.3 tsc -p tsconfig.types.json --noEmit
+      - name: Validate D1 SQL baseline and payments
+        run: python3 -c "import sqlite3; c=sqlite3.connect(':memory:'); c.executescript(open('sql/d1/0001_core.sql').read()); c.executescript(open('sql/d1/0002_payments.sql').read()); print('Validated D1 SQL')"

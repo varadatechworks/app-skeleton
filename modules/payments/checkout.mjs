@@ -25,6 +25,7 @@ export function createPaymentProviderRegistry(providers={}) {
 /** Never infer captured status from a browser redirect. Query the provider and compare all server-owned facts. */
 export function confirmCapturedPayment({expected,providerPayment}) {
  if (!expected || !providerPayment || !expected.tenantId || !expected.orderId) throw new Error('Missing server-owned payment intent');
+ if (!Number.isSafeInteger(expected.amountMinor) || expected.amountMinor<=0) throw new Error('Invalid captured amount');
  if (providerPayment.status!=='captured' || providerPayment.orderId!==expected.providerOrderId || providerPayment.amountMinor!==expected.amountMinor || providerPayment.currency!==expected.currency) throw new Error('Payment not captured or amount mismatch');
  if (expected.paymentId && expected.paymentId!==providerPayment.id) throw new Error('Payment identifier mismatch');
  return Object.freeze({tenantId:expected.tenantId,intentId:expected.orderId,providerPaymentId:providerPayment.id,capturedMinor:expected.amountMinor,currency:expected.currency});

@@ -16,7 +16,9 @@ export function calculateSettlementSplit({capturedMinor,refundMinor=0,platformFe
  currencyAmount(capturedMinor);currencyAmount(refundMinor);currencyAmount(processingFeeMinor);
  if(!Number.isSafeInteger(platformFeeBps)||platformFeeBps<0||platformFeeBps>10000||refundMinor>capturedMinor)throw new Error('Invalid settlement policy');
  const netMinor=capturedMinor-refundMinor;
- const platformFeeMinor=Math.round(netMinor*platformFeeBps/10000);
+ const feeBig=(BigInt(netMinor)*BigInt(platformFeeBps)+5000n)/10000n;
+ if(feeBig>BigInt(Number.MAX_SAFE_INTEGER))throw new Error('Settlement amount exceeds safe integer');
+ const platformFeeMinor=Number(feeBig);
  if(platformFeeMinor+processingFeeMinor>netMinor)throw new Error('Settlement fees exceed net');
  return Object.freeze({netMinor,platformFeeMinor,processingFeeMinor,partnerPayoutMinor:netMinor-platformFeeMinor-processingFeeMinor});
 }
