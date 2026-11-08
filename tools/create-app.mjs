@@ -24,7 +24,7 @@ try{await access(root);throw new Error('Refusing to overwrite existing directory
 await mkdir(join(root,'modules'),{recursive:true});await mkdir(join(root,'tests'),{recursive:true});if(selectedAdapters.length)await mkdir(join(root,'adapters'),{recursive:true});
 for(const id of picked){
  await cp(join(base,'modules',id),join(root,'modules',id),{recursive:true});
- for(const file of [id+'.test.mjs',...(id==='identity'?['user-service.test.mjs']:id==='authorization'?['role-service.test.mjs']:[])]){
+ for(const file of [id+'.test.mjs',...(id==='identity'?['user-service.test.mjs']:id==='authorization'?['role-service.test.mjs']:id==='payments'?['payment-lifecycle.test.mjs']:[])]){
   try{await cp(join(base,'tests',file),join(root,'tests',file));}catch(e){if(e.code!=='ENOENT')throw e;}
  }
 }
