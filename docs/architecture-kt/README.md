@@ -264,9 +264,9 @@ erDiagram
 ```
 
 ## 4. Database schema and migration registry
-**DDL/migration sources detected:** 4. **Baseline tables detected:** 22. The full and exact schema is defined by the ordered source SQL and later ALTERs, plus the deployed migration history; this table-name view is intentionally limited to inspected baseline files.
+**DDL source files detected:** 4 across PostgreSQL and D1 alternatives. **The ER above represents PostgreSQL template DDL only**; the two database dialects must not be counted or applied as a merged physical schema. The full and exact schema is defined by the ordered source SQL and later ALTERs, plus the deployed migration history; this table-name view is intentionally limited to inspected baseline files.
 
-Baseline tables: `tenants`, `app_users`, `roles`, `role_permissions`, `user_role_assignments`, `geography_nodes`, `user_geography_scopes`, `approval_requests`, `notification_templates`, `notification_preferences`, `notification_outbox`, `survey_forms`, `survey_form_versions`, `survey_targets`, `survey_submissions`, `cms_items`, `report_definitions`, `audit_events`, `feature_flags`, `app_releases`, `commerce_rules`, `payment_webhook_events`.
+Previously sampled template table names (one dialect, not a deployed database): `tenants`, `app_users`, `roles`, `role_permissions`, `user_role_assignments`, `geography_nodes`, `user_geography_scopes`, `approval_requests`, `notification_templates`, `notification_preferences`, `notification_outbox`, `survey_forms`, `survey_form_versions`, `survey_targets`, `survey_submissions`, `cms_items`, `report_definitions`, `audit_events`, `feature_flags`, `app_releases`, `commerce_rules`, `payment_webhook_events`.
 
 **Versioned SQL / schema paths:**
 - [`sql/d1/0001_core.sql`](../../sql/d1/0001_core.sql)
