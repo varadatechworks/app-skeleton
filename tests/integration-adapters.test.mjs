@@ -20,7 +20,7 @@ test('Nest guard denies absent identity and denies missing grants',async()=>{
 
 test('Next route requires verified identity and explicit grant',async()=>{
  const base={verifyPrincipal:async()=>principal,authorize:async()=>true,feature:'billing',action:'view',handler:async()=>new Response('ok')};
- assert.equal((await createNextRoute(base)(new Request('https://example.com'))).status,200);
+ const success=await createNextRoute(base)(new Request('https://example.com')); assert.equal(success.status,200); assert.equal(success.headers.get('cache-control'),'private, no-store');
  const unauthorized=await createNextRoute({...base,verifyPrincipal:async()=>null})(new Request('https://example.com'));
  assert.equal(unauthorized.status,401);assert.equal(unauthorized.headers.get('cache-control'),'no-store');
  assert.equal((await createNextRoute({...base,authorize:async()=>false})(new Request('https://example.com'))).status,403);
