@@ -24,3 +24,8 @@ Run `node tools/create-app.mjs --list`, select the required modules and generate
 - Providers: `adapters/providers/notifications.mjs` contains Resend and Twilio sender adapters and `adapters/providers/razorpay.mjs` contains server-side Razorpay REST calls. Secrets must be server environment values. Wrap notification submissions with a durable outbox; payment adapter REST responses need a mapping layer into `confirmCapturedPayment` contracts.
 
 **Do not use a sample client or provider directly as a complete live payment, messaging, or identity system.** See `docs/RELEASE_UAT.md` for the required real-provider and customer signoff gates.
+
+
+## Durable notifications (PostgreSQL)
+
+Apply `sql/postgres/0004_outbox_leases.sql` after the baseline schema, then use `adapters/postgres/outbox.mjs` to claim, deliver and acknowledge records. The tenant must be server-verified; the worker uses `FOR UPDATE SKIP LOCKED`, attempt counters, bounded leases and a `dead_letter` state. Message delivery remains **at least once**: a crash after provider acceptance but before DB acknowledgement may redeliver. Use provider-supported idempotency keys where available, alert on dead-letter rows, and carefully monitor claim expiration. Do not include raw provider errors or OTPs in the persisted failure code.
