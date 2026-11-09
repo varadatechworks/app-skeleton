@@ -6,16 +6,13 @@ export function verifyWebhook(rawBody,signature,secret){
  return provided.length===expected.length&&timingSafeEqual(provided,expected);
 }
 /**
- * Persistent idempotency repository is required for once-only effects.
- * A caller-supplied event ID alone cannot be trusted as a replay key:
- * the same signed payload could be resubmitted with a different ID.
- * Bind deduplication to the signed bytes and the server-resolved tenant/provider.
- * The injected store MUST run the callback atomically within a durable transaction.
+ * Replay key is scoped to server-resolved tenant/provider and signed payload.
+ * process(parsed, transactionClient) must write using the provided client.
  */
 export async function handleWebhook({rawBody,signature,secret,tenantId,provider,eventId,idempotencyStore,process}){
  if(!verifyWebhook(rawBody,signature,secret))throw new Error('Invalid webhook signature');
  if(!tenantId||!provider||!eventId||typeof idempotencyStore?.runOnce!=='function'||typeof process!=='function')throw new Error('Durable idempotency adapter required');
  const digest=createHash('sha256').update(rawBody).digest('hex');
  const replayKey=JSON.stringify([tenantId,provider,digest]);
- return idempotencyStore.runOnce(replayKey,()=>process(JSON.parse(rawBody.toString())));
+ return idempotencyStore.runOnce(replayKey,(tx)=>process(JSON.parse(rawBody.toString()),tx));
 }

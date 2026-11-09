@@ -17,6 +17,20 @@ jobs:
   unit-and-contracts:
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: skeleton_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d skeleton_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
     steps:
       - name: Check out source
         uses: actions/checkout@v4
@@ -30,6 +44,12 @@ jobs:
         run: npm test
       - name: Run coverage tests
         run: npm run coverage
+      - name: Install PostgreSQL test driver (CI only)
+        run: npm install --no-save --ignore-scripts pg@8.13.1
+      - name: Verify real PostgreSQL transaction, RLS and concurrent replay
+        env:
+          SKELETON_PG_TEST_URL: postgresql://postgres:postgres@localhost:5432/skeleton_test
+        run: node --test tests/postgres-live.test.mjs
       - name: Check TypeScript contracts
         run: npx --yes -p typescript@5.9.3 tsc -p tsconfig.types.json --noEmit
       - name: Validate Cloudflare D1 schema
