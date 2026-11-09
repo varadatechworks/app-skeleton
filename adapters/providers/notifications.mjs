@@ -1,8 +1,5 @@
 import {createServerHttpTransport} from './http.mjs';
-/**
- * Provider-specific authenticated submission. No implicit delivery guarantees.
- * Call through a durable outbox; verify consent and template approval upstream.
- */
+/** Server-side Resend email provider. Dispatch only after explicit consent check. */
 export function createResendEmail({apiKey,from,send=createServerHttpTransport()}){
  if(!apiKey||!from||typeof send!=='function')throw new Error('Resend config required');
  return {channel:'email',async send({recipient,subject,content}){
@@ -11,11 +8,18 @@ export function createResendEmail({apiKey,from,send=createServerHttpTransport()}
   if(!r.id)throw new Error('Email provider reference missing');return {reference:r.id};
  }};
 }
-export function createTwilioSms({accountSid,authToken,from,send=createServerHttpTransport()}){
- if(!/^AC[a-f0-9]{32}$/i.test(accountSid||'')||!authToken||!from||typeof send!=='function')throw new Error('Twilio config required');
- return {channel:'sms',async send({recipient,content}){
-  if(!recipient||!content)throw new Error('SMS payload required');
-  // Transport accepts JSON; Twilio requires URL-encoded form. See integration documentation.
-  throw new Error('Twilio SMS transport requires a form-encoded transport adapter');
- }};
+/** Twilio Messaging REST API with form-encoded body and bounded network timeout. */
+export function createTwilioSms({accountSid,authToken,from,fetchImpl=globalThis.fetch}){
+ if(!/^AC[a-f0-9]{32}$/i.test(accountSid||'')||!authToken||!from||typeof fetchImpl!=='function')throw new Error('Twilio config required');
+ return Object.freeze({channel:'sms',async send({recipient,content}){
+  if(typeof recipient!=='string'||!/^\+[1-9][0-9]{6,14}$/.test(recipient)||typeof content!=='string'||!content||content.length>1600)throw new Error('Invalid SMS payload');
+  const url='https://api.twilio.com/2010-04-01/Accounts/'+accountSid+'/Messages.json';
+  const body=new URLSearchParams({To:recipient,From:from,Body:content}).toString();
+  const auth='Basic '+Buffer.from(accountSid+':'+authToken).toString('base64');
+  const response=await fetchImpl(url,{method:'POST',redirect:'error',signal:AbortSignal.timeout(10000),headers:{authorization:auth,'content-type':'application/x-www-form-urlencoded'},body});
+  if(!response.ok)throw new Error('SMS provider rejected request ('+response.status+')');
+  const data=await response.json();
+  if(!data.sid)throw new Error('SMS provider reference missing');
+  return {reference:data.sid};
+ }});
 }
