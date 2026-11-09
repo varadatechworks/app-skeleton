@@ -1,0 +1,45 @@
+name: Foundation CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: foundation-ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  unit-and-contracts:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Run unit and negative-path tests
+        run: npm test
+      - name: Run coverage tests
+        run: npm run coverage
+      - name: Check TypeScript contracts
+        run: npx --yes -p typescript@5.9.3 tsc -p tsconfig.types.json --noEmit
+      - name: Validate Cloudflare D1 schema
+        run: |
+          python3 - <<'PY'
+          import sqlite3
+          db = sqlite3.connect(':memory:')
+          for migration in ('sql/d1/0001_core.sql', 'sql/d1/0002_payments.sql'):
+              with open(migration, encoding='utf-8') as f:
+                  db.executescript(f.read())
+          assert db.execute("PRAGMA integrity_check").fetchone()[0] == "ok"
+          print("D1 migrations applied; integrity check passed.")
+          PY
