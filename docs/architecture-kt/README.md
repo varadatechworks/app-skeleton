@@ -31,157 +31,236 @@ flowchart TB
 ```
 **Complete for each environment:** cloud project/region, DNS and custom domain, static/web deployment, API container/function, environment names, database identity, secret manager, backup owner, health check, rollback release, CI status and contact matrix. Diagram does **not** establish a running deployment.
 
-## 3. ER diagram - representative source-verified baseline
+## 3. ER diagram - PostgreSQL template subset (other dialects separately versioned)
 The ER uses `CREATE TABLE` and declared `REFERENCES` found in **2 selected baseline file(s)**, not every subsequent migration. It is not a complete physical ER; export the current database catalog for authoritative tables, columns and foreign keys.
 
 ```mermaid
 erDiagram
-    TENANTS {
-        string id PK
-        string name
-        string deployment_mode
-        string active
-        string created_at
-    }
     APP_USERS {
-        string id PK
-        string tenant_id
-        string email
-        string mobile
-        string display_name
-    }
-    ROLES {
-        string id PK
-        string tenant_id
-        string code
-        string name
-        string active
-    }
-    ROLE_PERMISSIONS {
-        string id PK
-        string tenant_id
-        string role_id
-        string feature_code
-        string action
-    }
-    USER_ROLE_ASSIGNMENTS {
-        string id PK
-        string tenant_id
-        string user_id
-        string role_id
-        string function_code
-    }
-    GEOGRAPHY_NODES {
-        string id PK
-        string tenant_id
-        string parent_id
-        string level
-        string name
-    }
-    USER_GEOGRAPHY_SCOPES {
-        string id PK
-        string tenant_id
-        string user_id
-        string geography_id
-        string function_code
+        TEXT id PK
+        TEXT tenant_id FK
+        TEXT email
+        TEXT mobile
+        TEXT display_name
+        TEXT status
+        TEXT locale
+        TIMESTAMPTZ created_at
+        TIMESTAMPTZ updated_at
     }
     APPROVAL_REQUESTS {
-        string id PK
-        string tenant_id
-        string entity_type
-        string entity_id
-        string maker_id
-    }
-    NOTIFICATION_TEMPLATES {
-        string id PK
-        string tenant_id
-        string code
-        string channel
-        string locale
-    }
-    NOTIFICATION_PREFERENCES {
-        string id PK
-        string tenant_id
-        string user_id
-        string channel
-        string consent
-    }
-    NOTIFICATION_OUTBOX {
-        string id PK
-        string tenant_id
-        string user_id
-        string channel
-        string status
-    }
-    SURVEY_FORMS {
-        string id PK
-        string tenant_id
-        string title
-        string status
-        string current_version
-    }
-    SURVEY_FORM_VERSIONS {
-        string id PK
-        string form_id
-        string tenant_id
-        string version
-        string created_at
-    }
-    SURVEY_TARGETS {
-        string id PK
-        string tenant_id
-        string form_id
-        string target_type
-        string target_id
-    }
-    SURVEY_SUBMISSIONS {
-        string id PK
-        string tenant_id
-        string form_id
-        string form_version
-        string actor_id
+        TEXT id PK
+        TEXT tenant_id FK
+        TEXT entity_type
+        TEXT entity_id
+        TEXT maker_id FK
+        TEXT reviewer_id FK
+        TEXT status
+        INTEGER version
+        JSONB payload
     }
     CMS_ITEMS {
-        string id PK
-        string tenant_id
-        string author_id
-        string category
-        string locale
+        TEXT id PK
+        TEXT tenant_id FK
+        TEXT author_id FK
+        TEXT category
+        TEXT locale
+        TEXT title
+        TEXT status
+        INTEGER version
+        JSONB payload
     }
-    REPORT_DEFINITIONS {
-        string id PK
-        string tenant_id
-        string code
-        string name
-        string active
+    GEOGRAPHY_NODES {
+        TEXT id PK
+        TEXT tenant_id FK
+        TEXT parent_id
+        TEXT level
+        TEXT name
+        BOOLEAN active
     }
-    AUDIT_EVENTS {
-        string id PK
-        string tenant_id
-        string actor_id
-        string action
-        string resource
+    NOTIFICATION_OUTBOX {
+        TEXT id PK
+        TEXT tenant_id FK
+        TEXT user_id FK
+        TEXT channel
+        JSONB payload
+        TEXT status
+        INTEGER attempts
+        TIMESTAMPTZ next_attempt_at
+        TEXT provider_ref
     }
-    TENANTS ||--o{ APP_USERS : references
-    TENANTS ||--o{ ROLES : references
-    TENANTS ||--o{ ROLE_PERMISSIONS : references
-    ROLES ||--o{ ROLE_PERMISSIONS : references
-    TENANTS ||--o{ USER_ROLE_ASSIGNMENTS : references
-    APP_USERS ||--o{ USER_ROLE_ASSIGNMENTS : references
-    ROLES ||--o{ USER_ROLE_ASSIGNMENTS : references
-    TENANTS ||--o{ GEOGRAPHY_NODES : references
-    TENANTS ||--o{ USER_GEOGRAPHY_SCOPES : references
-    APP_USERS ||--o{ USER_GEOGRAPHY_SCOPES : references
-    GEOGRAPHY_NODES ||--o{ USER_GEOGRAPHY_SCOPES : references
-    TENANTS ||--o{ APPROVAL_REQUESTS : references
-    APP_USERS ||--o{ APPROVAL_REQUESTS : references
-    APP_USERS ||--o{ APPROVAL_REQUESTS : references
-    TENANTS ||--o{ NOTIFICATION_TEMPLATES : references
-    TENANTS ||--o{ NOTIFICATION_PREFERENCES : references
-    APP_USERS ||--o{ NOTIFICATION_PREFERENCES : references
-    TENANTS ||--o{ NOTIFICATION_OUTBOX : references
-    APP_USERS ||--o{ NOTIFICATION_OUTBOX : references
-    TENANTS ||--o{ SURVEY_FORMS : references
+    NOTIFICATION_PREFERENCES {
+        TEXT tenant_id PK
+        TEXT user_id PK
+        TEXT channel PK
+        BOOLEAN consent
+        BOOLEAN enabled
+    }
+    PAYMENT_INTENTS {
+        TEXT id PK
+        TEXT tenant_id FK
+        TEXT provider
+        TEXT provider_order_id
+        TEXT order_id
+        BIGINT amount_minor
+        CHAR currency
+        TEXT status
+        JSONB quote_snapshot
+    }
+    PAYMENT_LEDGER {
+        TEXT id PK
+        TEXT tenant_id FK
+        TEXT transaction_id
+        TEXT refund_id
+        TEXT entry_type
+        BIGINT amount_minor
+        CHAR currency
+        TEXT external_event_key
+        TIMESTAMPTZ recorded_at
+    }
+    PAYMENT_REFUNDS {
+        TEXT id PK
+        TEXT tenant_id FK
+        TEXT transaction_id
+        TEXT provider_refund_id
+        TEXT client_idempotency_key
+        BIGINT requested_minor
+        BIGINT fee_deduction_minor
+        BIGINT provider_refund_minor
+        TEXT reason
+    }
+    PAYMENT_SETTLEMENTS {
+        TEXT id PK
+        TEXT tenant_id FK
+        TEXT provider
+        TEXT settlement_ref
+        TEXT transaction_id
+        BIGINT net_minor
+        BIGINT platform_fee_minor
+        BIGINT processing_fee_minor
+        BIGINT partner_payout_minor
+    }
+    PAYMENT_TRANSACTIONS {
+        TEXT id PK
+        TEXT tenant_id FK
+        TEXT intent_id
+        TEXT provider
+        TEXT provider_payment_id
+        BIGINT amount_minor
+        CHAR currency
+        TEXT status
+        TIMESTAMPTZ occurred_at
+    }
+    ROLE_PERMISSIONS {
+        TEXT tenant_id PK
+        TEXT role_id PK
+        TEXT feature_code PK
+        TEXT action PK
+    }
+    ROLES {
+        TEXT id PK
+        TEXT tenant_id FK
+        TEXT code
+        TEXT name
+        BOOLEAN active
+    }
+    SURVEY_FORM_VERSIONS {
+        TEXT form_id PK
+        TEXT tenant_id FK
+        INTEGER version PK
+        JSONB definition
+        TIMESTAMPTZ created_at
+    }
+    SURVEY_FORMS {
+        TEXT id PK
+        TEXT tenant_id FK
+        TEXT title
+        TEXT status
+        INTEGER current_version
+        TIMESTAMPTZ opens_at
+        TIMESTAMPTZ closes_at
+        BOOLEAN require_location
+        TEXT submission_mode
+    }
+    SURVEY_SUBMISSIONS {
+        TEXT id PK
+        TEXT tenant_id FK
+        TEXT form_id FK
+        INTEGER form_version
+        TEXT actor_id FK
+        TEXT geography_id FK
+        JSONB answers
+        DOUBLE latitude
+        DOUBLE longitude
+    }
+    SURVEY_TARGETS {
+        TEXT id PK
+        TEXT tenant_id FK
+        TEXT form_id FK
+        TEXT target_type
+        TEXT target_id
+    }
+    TENANTS {
+        TEXT id PK
+        TEXT name
+        TEXT deployment_mode
+        BOOLEAN active
+        TIMESTAMPTZ created_at
+    }
+    USER_GEOGRAPHY_SCOPES {
+        TEXT id PK
+        TEXT tenant_id FK
+        TEXT user_id
+        TEXT geography_id
+        TEXT function_code
+        BOOLEAN active
+    }
+    USER_ROLE_ASSIGNMENTS {
+        TEXT id PK
+        TEXT tenant_id FK
+        TEXT user_id
+        TEXT role_id
+        TEXT function_code
+        BOOLEAN active
+        TIMESTAMPTZ created_at
+    }
+    TENANTS ||--o{ APP_USERS : tenant_id
+    TENANTS ||--o{ ROLES : tenant_id
+    TENANTS ||--o{ ROLE_PERMISSIONS : tenant_id
+    ROLES ||--o{ ROLE_PERMISSIONS : tenant_id
+    TENANTS ||--o{ USER_ROLE_ASSIGNMENTS : tenant_id
+    APP_USERS ||--o{ USER_ROLE_ASSIGNMENTS : tenant_id
+    ROLES ||--o{ USER_ROLE_ASSIGNMENTS : tenant_id
+    TENANTS ||--o{ GEOGRAPHY_NODES : tenant_id
+    TENANTS ||--o{ USER_GEOGRAPHY_SCOPES : tenant_id
+    APP_USERS ||--o{ USER_GEOGRAPHY_SCOPES : tenant_id
+    GEOGRAPHY_NODES ||--o{ USER_GEOGRAPHY_SCOPES : tenant_id
+    TENANTS ||--o{ APPROVAL_REQUESTS : tenant_id
+    APP_USERS ||--o{ APPROVAL_REQUESTS : maker_id
+    TENANTS ||--o{ NOTIFICATION_PREFERENCES : tenant_id
+    APP_USERS ||--o{ NOTIFICATION_PREFERENCES : user_id
+    TENANTS ||--o{ NOTIFICATION_OUTBOX : tenant_id
+    APP_USERS ||--o{ NOTIFICATION_OUTBOX : user_id
+    TENANTS ||--o{ SURVEY_FORMS : tenant_id
+    SURVEY_FORMS ||--o{ SURVEY_FORM_VERSIONS : form_id
+    TENANTS ||--o{ SURVEY_FORM_VERSIONS : tenant_id
+    TENANTS ||--o{ SURVEY_TARGETS : tenant_id
+    SURVEY_FORMS ||--o{ SURVEY_TARGETS : form_id
+    TENANTS ||--o{ SURVEY_SUBMISSIONS : tenant_id
+    SURVEY_FORMS ||--o{ SURVEY_SUBMISSIONS : form_id
+    APP_USERS ||--o{ SURVEY_SUBMISSIONS : actor_id
+    GEOGRAPHY_NODES ||--o{ SURVEY_SUBMISSIONS : geography_id
+    TENANTS ||--o{ CMS_ITEMS : tenant_id
+    APP_USERS ||--o{ CMS_ITEMS : author_id
+    TENANTS ||--o{ PAYMENT_INTENTS : tenant_id
+    TENANTS ||--o{ PAYMENT_TRANSACTIONS : tenant_id
+    PAYMENT_INTENTS ||--o{ PAYMENT_TRANSACTIONS : tenant_id
+    TENANTS ||--o{ PAYMENT_REFUNDS : tenant_id
+    PAYMENT_TRANSACTIONS ||--o{ PAYMENT_REFUNDS : tenant_id
+    TENANTS ||--o{ PAYMENT_LEDGER : tenant_id
+    PAYMENT_TRANSACTIONS ||--o{ PAYMENT_LEDGER : tenant_id
+    PAYMENT_REFUNDS ||--o{ PAYMENT_LEDGER : tenant_id
+    TENANTS ||--o{ PAYMENT_SETTLEMENTS : tenant_id
+    PAYMENT_TRANSACTIONS ||--o{ PAYMENT_SETTLEMENTS : tenant_id
 ```
 
 ## 4. Database schema and migration registry
