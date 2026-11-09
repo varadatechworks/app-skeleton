@@ -4,7 +4,7 @@ import {readFile} from 'node:fs/promises';
 import {createPgIdempotencyStore} from '../adapters/postgres/idempotency.mjs';
 
 test('real PostgreSQL idempotency, RLS and rollback', {skip:!process.env.SKELETON_PG_TEST_URL}, async()=>{
- const {Pool}=await import('pg');
+ const {Pool}=(await import('pg')).default;
  const admin=new Pool({connectionString:process.env.SKELETON_PG_TEST_URL});
  let pool;
  try{
