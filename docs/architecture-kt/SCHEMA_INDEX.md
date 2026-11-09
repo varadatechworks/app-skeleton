@@ -1080,3 +1080,37 @@ erDiagram
 6. Generate physical ER from selected application's deployed database; don't claim this library template itself runs on PostgreSQL or D1.
 
 See [portfolio handover index](../PORTFOLIO_TECHNICAL_HANDOVER.md) and [library integration contract](../../docs/INTEGRATION.md).
+
+
+## Addendum — PostgreSQL concurrency and outbox migrations (10 November 2026)
+
+The original baseline schema tables above cover `0001_core.sql` and `0002_payments.sql`, but the current `main` also includes **two additional PostgreSQL SQL files**:
+
+- [`0003_idempotency.sql`](../../sql/postgres/0003_idempotency.sql): introduces `skeleton_idempotency` with composite key `(tenant_id, namespace, key_digest)`, tenant-scoped row-level security, and retention index. Protect the application role against BYPASSRLS and test a real transaction-based implementation.
+- [`0004_outbox_leases.sql`](../../sql/postgres/0004_outbox_leases.sql): adds `claim_token`, `locked_until`, `last_error_code` to the existing `notification_outbox` table plus a tenant-aware dispatch index.
+
+### Additional ER (PostgreSQL only)
+```mermaid
+erDiagram
+    TENANTS ||--o{ SKELETON_IDEMPOTENCY : owns
+    TENANTS ||--o{ NOTIFICATION_OUTBOX : owns
+    SKELETON_IDEMPOTENCY {
+        text tenant_id PK
+        text namespace PK
+        text key_digest PK
+        jsonb result_json
+        timestamptz created_at
+    }
+    NOTIFICATION_OUTBOX {
+        text tenant_id
+        text claim_token
+        timestamptz locked_until
+        text last_error_code
+    }
+    TENANTS {
+        text id PK
+    }
+```
+The `TENANTS` conceptual links above represent **tenant scope**, not necessarily a declared foreign-key constraint in `0003`. Verify actual database constraints before treating them as physical links.
+
+**This library's DDL remains an example, not an applied database release.** Its six current dialect-specific SQL files comprise PostgreSQL `0001`–`0004` and D1 `0001`–`0002`; never apply both dialects together. Run any selected files against a fresh disposable DB with a reviewed consumer migration plan.
