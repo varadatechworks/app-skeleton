@@ -70,7 +70,7 @@ test('Postgres idempotency passes transaction client to webhook business action'
   return {rows:[],rowCount:1};
  },release(){}};
  const pool={connect:async()=>client};
- const store=createPgIdempotencyStore(pool,{tenant_id:'tenant1'});
+ const store=createPgIdempotencyStore(pool,{verified:true,tenantId:'tenant1'});
  const raw=JSON.stringify({event:'payment.captured',payload:{id:'pay1'}}),secret='long_fake_webhook_secret';
  const signature=createHmac('sha256',secret).update(raw).digest('hex');
  const deliver=eventId=>handleWebhook({rawBody:raw,signature,secret,tenantId:'tenant1',provider:'razorpay',eventId,idempotencyStore:store,process:async(_,tx)=>{assert.equal(tx,client);assert.equal(active,true);effects++;return {accepted:true};}});
