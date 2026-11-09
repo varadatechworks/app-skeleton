@@ -26,7 +26,7 @@ Every accessible repository has a committed source-derived [`docs/architecture-k
 | [`varadatechworks/ssv-decors`](https://github.com/varadatechworks/ssv-decors) | Empty application source; only planning/KT docs | Not applicable | Requirements and code missing | [Reverse engineering](https://github.com/varadatechworks/ssv-decors/blob/main/docs/architecture-kt/REVERSE_ENGINEERING.md) |
 
 ## Deliverable locations by project
-Every repo has:
+Every repository has a handover entry; SSV Decors uses its root `README.md` because there is no application source yet. Source-bearing repositories generally have:
 - `docs/architecture-kt/README.md`: logical architecture, deployment, operations/maintenance, data-model applicability and KT demo.
 - `docs/architecture-kt/REVERSE_ENGINEERING.md`: exact code/source evidence, entrypoints, modules, API/controller inventory, CI/config and explicit unverified deployment claims.
 - `docs/architecture-kt/SCHEMA_INDEX.md` where source DDL or template models exist (**11 repos**); ER diagrams and migrations are linked from the index. Static/no-code projects are intentionally **not** assigned invented physical SQL tables.
