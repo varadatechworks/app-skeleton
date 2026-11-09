@@ -26,3 +26,8 @@ This repository is an integration library and UI reference, **not a deployed app
 | Deploy | GitHub CI and release checklist | No production deployment or customer signoff |
 
 Do not label the platform production-ready until all application-specific gates pass.
+
+
+## Durable notifications (PostgreSQL)
+
+Apply `sql/postgres/0004_outbox_leases.sql` after the baseline schema, then use `adapters/postgres/outbox.mjs` to claim, deliver and acknowledge records. The tenant must be server-verified; the worker uses `FOR UPDATE SKIP LOCKED`, attempt counters, bounded leases and a `dead_letter` state. Message delivery remains **at least once**: a crash after provider acceptance but before DB acknowledgement may redeliver. Use provider-supported idempotency keys where available, alert on dead-letter rows, and carefully monitor claim expiration. Do not include raw provider errors or OTPs in the persisted failure code.
