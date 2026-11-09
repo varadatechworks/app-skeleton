@@ -1,3 +1,5 @@
+> **10 Nov 2026 source audit:** Every one of the 16 repositories now has a source-backed dossier. See [reverse-engineering evidence register](PORTFOLIO_REVERSE_ENGINEERING_2026-11-10.md) and [corrected database status](PORTFOLIO_SCHEMA_STATUS.md). SevaMitra and FreshPrep source recovered on non-main branches; do not mistake this for deployment.
+
 # Portfolio technical architecture, deployment, database and KT hub
 
 > **Scope:** all repositories visible on 2026-11-09 under `bv-prasanna`, `SS-trust` and `varadatechworks`. **16 repositories**; source-derived documentation, not certification of production availability. New repositories after this inventory require separate onboarding.
